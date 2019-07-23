@@ -16,7 +16,7 @@ class App extends React.Component {
     var url = `http://api.giphy.com/v1/gifs/search?q=${this.state.text}&api_key=${key}`
     var r = await fetch(url)
     var json = await r.json()
-    this.setState({memes: json.data, loading: false, text:''})
+    this.setState({memes: json.data, loading:false, text:''})
     console.log(json)
   }
 
@@ -25,13 +25,23 @@ class App extends React.Component {
     return (
       <div className="App">
         <form className="App-header" onSubmit={this.getMemes}>
-          <input value={text}
+          <TextField value={text}
+            autoFocus
+            variant="outlined"
+            label="Search for Memes"
             onChange={e=> this.setState({text: e.target.value})}
+            style={{width:'100%',marginLeft:8}}
           />
-          <button disabled={loading || !text} type="submit">
+          <Button variant="contained"
+            color="primary"
+            disabled={loading || !text} 
+            type="submit"
+            style={{width:150, margin:'0 10px', height:75}}>
+            <SearchIcon style={{marginRight:8}} />
             Search
-            </button>
+          </Button>
         </form>
+        {loading && <LinearProgress />}
         <main>
           {memes.map(meme=>{
             return <Meme key={meme.id} meme={meme} />
