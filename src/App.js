@@ -1,5 +1,12 @@
 import React from 'react';
 import './App.css';
+//import Button from '@material-ui/core/Button';
+import Button from 'react-bootstrap/Button';
+// import TextField from '@material-ui/core/TextField';
+import Form from 'react-bootstrap/Form';
+import SearchIcon from '@material-ui/icons/Search';
+//import LinearProgress from '@material-ui/core/LinearProgress';
+import ProgressBar from 'react-bootstrap/Form';
 
 class App extends React.Component {
 
@@ -25,10 +32,10 @@ class App extends React.Component {
     return (
       <div className="App">
         <form className="App-header" onSubmit={this.getMemes}>
-          <TextField value={text}
+          <Form.Control value={text}
             autoFocus
             variant="outlined"
-            label="Search for Memes"
+            placeholder="Search for Memes"
             onChange={e=> this.setState({text: e.target.value})}
             style={{width:'100%',marginLeft:8}}
           />
@@ -41,7 +48,7 @@ class App extends React.Component {
             Search
           </Button>
         </form>
-        {loading && <LinearProgress />}
+        {loading && <ProgressBar striped variant="success" />}
         <main>
           {memes.map(meme=>{
             return <Meme key={meme.id} meme={meme} />
