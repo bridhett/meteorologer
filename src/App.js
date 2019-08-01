@@ -1,41 +1,69 @@
 import React from 'react';
 import './App.css';
-//import Button from '@material-ui/core/Button';
-import Button from 'react-bootstrap/Button';
-// import TextField from '@material-ui/core/TextField';
-import Form from 'react-bootstrap/Form';
+import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
 import SearchIcon from '@material-ui/icons/Search';
-//import LinearProgress from '@material-ui/core/LinearProgress';
-import ProgressBar from 'react-bootstrap/Form';
+import LinearProgress from '@material-ui/core/LinearProgress';
+import moment from 'moment'
+import {Bar} from 'react-chartjs-2'
 
 class App extends React.Component {
 
   state={
-    memes:[],
-    loading: false,
+    weather:null,
+    loading:false,
     text:'',
   }
 
-  getMemes = async (e) => {
+  getWeather = async (e) => {
     e.preventDefault()
-    this.setState({loading: true})
-    var key = 'Kd8A5MXRCFSgM6bRq33arpSGh8aVBBsw'
-    var url = `http://api.giphy.com/v1/gifs/search?q=${this.state.text}&api_key=${key}`
+    this.setState({loading: true, weather:null})
+    var key = '333cdb2ee5c297c0bcd70eaaa28fd894'
+    var url = `http://api.openweathermap.org/data/2.5/forecast?q=${this.state.text}&units=imperial&APPID=${key}`
     var r = await fetch(url)
     var json = await r.json()
-    this.setState({memes: json.data, loading:false, text:''})
-    console.log(json)
+
+    if(r.status===200){
+      this.setState({
+        weather: json.list, 
+        loading:false, 
+        text:'', 
+        error:null
+      })
+    } else {
+      this.setState({
+        error: json.message, 
+        loading:false
+      })
+    }
   }
 
   render() {
-    var {memes, loading, text} = this.state
+    var {weather, loading, text, error} = this.state
+    var data
+
+    if(weather){
+      data = {
+        labels: weather.map(w=> moment(w.dt*1000).format('ll hh:mm a')),
+        datasets: [{
+          label:'Temperature',
+          borderWidth: 1,
+          data: weather.map(w=> w.main.temp),
+          backgroundColor: 'rgba(132,99,255,0.2)',
+          borderColor: 'rgba(132,99,255,1)',
+          hoverBackgroundColor: 'rgba(132,99,255,0.4)',
+          hoverBorderColor: 'rgba(132,99,255,1)',
+        }]
+      }
+    }
+
     return (
       <div className="App">
-        <form className="App-header" onSubmit={this.getMemes}>
-          <Form.Control value={text}
+        <form className="App-header" onSubmit={this.getWeather}>
+          <TextField value={text}
             autoFocus
             variant="outlined"
-            placeholder="Search for Memes"
+            label="Search for Weather by City"
             onChange={e=> this.setState({text: e.target.value})}
             style={{width:'100%',marginLeft:8}}
           />
@@ -48,22 +76,18 @@ class App extends React.Component {
             Search
           </Button>
         </form>
-        {loading && <ProgressBar striped variant="success" />}
+        {loading && <LinearProgress />}
         <main>
-          {memes.map(meme=>{
-            return <Meme key={meme.id} meme={meme} />
-          })}
+          {data && <Bar
+            data={data}
+            width={800}
+            height={400}
+          />}
+          {error && <div style={{color:'rgb(150,80,50)'}}>{error}</div>}
         </main>
       </div>
     );
   }
 }
 
-function Meme(props){
-  const {meme} = props
-  const url = meme.images.fixed_height.url
-  return (<div className="meme-wrap" onClick={()=>window.open(url, '_blank')}>
-    <img height="200" alt="meme" src={url} />
-  </div>)
-}
 export default App;
